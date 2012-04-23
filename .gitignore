@@ -1,0 +1,10 @@
+*.ko
+*.o
+.tmp_version
+*.cmd
+*.mod.c
+.tmp_versions
+ioctl_test
+output_packets
+Module.symvers
+modules.order
