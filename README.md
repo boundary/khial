@@ -28,7 +28,7 @@ to unload simply run:
 
 ### how to use khial
 
-once it has been loaded, khial will expose a network device. you should be able to see it by runnig ifconfig -a.
+once it has been loaded, khial will expose a network device. you should be able to see it by running `ifconfig -a`.
 
 khial exposes a character device that gets mknod'd in loaddriver.sh and appears in /dev/char/, named testpacket0, testpacket1, etc.
 
