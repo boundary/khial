@@ -13,6 +13,14 @@ it turns out that a lot (but certainly not all) of testing in this area is focus
 
 i wanted a way to test for strange bugs in different network configurations to detect weird bugs before shipping to customers (see also: http://blog.boundary.com/2012/04/04/a-deep-dive-to-find-a-nasty-bug/). khial helps to do this, beacuse you can ask khial to create several test devices and assign them various IP addresses, MAC addresses, and so on.
 
+### supported operating systems and kernels
+
+khial has been tested on:
+
+  - 64bit Ubuntu 10.04 2.6.32-40-generic #87 SMP
+
+other operating systems may require modifications to the source for the driver to work properly.
+
 ### how to build, load, and unload
 
 you will need to follow the directions for building kernel modules on your linux distribution. usually, you'll just need to install some sort of kernel header file package (on Ubuntu, it might be called something like linux-headers-$(uname -r)).
