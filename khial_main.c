@@ -336,6 +336,7 @@ static int setup_cdev(struct khial *adapter, int idx)
 
 static void khial_dev_free(struct net_device *dev)
 {
+  dev_close(dev);
   unregister_netdev(dev);
   free_netdev(dev);
 }
