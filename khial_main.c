@@ -33,6 +33,11 @@
 #include <linux/ethtool.h>
 #include <net/sock.h>
 #include <net/sch_generic.h>
+#ifndef LINUX_VERSION_CODE
+#include <linux/version.h>
+#else
+#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+#endif
 
 extern void khial_set_ethtool_ops(struct net_device *);
 
@@ -129,7 +134,11 @@ out:
   return ret;
 }
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38))
 static int khial_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
+#else
+static long khial_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+#endif
 {
   struct khial *dev = filp->private_data;
   int retval = 0;
@@ -159,7 +168,11 @@ static int khial_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 const struct file_operations khial_fops = {
   .open = khial_open,
   .write = khial_write,
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,11))
   .ioctl = khial_ioctl
+#else
+  .unlocked_ioctl = khial_ioctl
+#endif
 };
 
 static int khial_set_address(struct net_device *dev, void *p)
@@ -174,10 +187,17 @@ static int khial_set_address(struct net_device *dev, void *p)
 }
 
 /* fake multicast ability */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 2, 0)
 static void set_multicast_list(struct net_device *dev)
 {
   return;
 }
+#else
+static void set_rx_mode(struct net_device *dev)
+{
+  return;
+}
+#endif
 
 static netdev_tx_t khial_xmit(struct sk_buff *skb, struct net_device *dev)
 {
@@ -247,7 +267,11 @@ out:
 static const struct net_device_ops khial_netdev_ops = {
   .ndo_start_xmit = khial_xmit,
   .ndo_validate_addr = eth_validate_addr,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 2, 0)
   .ndo_set_multicast_list = set_multicast_list,
+#else
+  .ndo_set_rx_mode = set_rx_mode,
+#endif
   .ndo_set_mac_address = khial_set_address,
   .ndo_do_ioctl = khial_do_ioctl,
   .ndo_get_stats = khial_get_stats,
@@ -270,8 +294,7 @@ static void khial_setup(struct net_device *dev)
 
   /* make sure the device is broadcast, multicast, and UP */
   dev->flags |= (IFF_MULTICAST | IFF_BROADCAST);
-  dev->features = NETIF_F_LLTX | NETIF_F_NO_CSUM;
-
+  dev->features = NETIF_F_LLTX | NETIF_F_HW_CSUM;
   random_ether_addr(dev->perm_addr);
   random_ether_addr(dev->dev_addr);
 
